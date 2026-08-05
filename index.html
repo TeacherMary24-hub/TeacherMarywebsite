@@ -195,7 +195,6 @@ margin-top: 15px;
 </button>
 </div>
 
-<!-- Teacher Settings Toggle Card -->
 <div class="card wordbank" id="wordBankCard">
 <h2>Step 1: Add Words & Meanings</h2>
 <p>Tip: Use hyphens (-) to control exact syllables (e.g., <b>pa-ar-al-an</b>)</p>
@@ -219,7 +218,7 @@ Kaakit-akit o kalugud-lugod sa paningin</textarea>
 <br><br>
 
 <button class="btn-green" onclick="loadWordList()">
-Load Active List
+Save and Load List
 </button>
 
 <h3 id="counter" style="color: #2b8a3e; font-family: 'Fredoka One';">
@@ -300,6 +299,20 @@ function loadWordList(){
   let wordsText = document.getElementById("wordInputBox").value;
   let meaningsText = document.getElementById("meaningInputBox").value;
 
+  // Save text directly to localStorage for persistence
+  try {
+    localStorage.setItem("abakada_words", wordsText);
+    localStorage.setItem("abakada_meanings", meaningsText);
+  } catch (e) {
+    console.warn("Storage restricted or unavailable.");
+  }
+
+  processTextData(wordsText, meaningsText);
+  alert("List saved and loaded successfully!");
+  toggleSettings(); // Automatically hide settings panel once saved
+}
+
+function processTextData(wordsText, meaningsText) {
   let wordsLines = wordsText.split("\n").map(w => w.trim()).filter(w => w !== "");
   let meaningsLines = meaningsText.split("\n").map(m => m.trim()).filter(m => m !== "");
 
@@ -324,8 +337,6 @@ function loadWordList(){
 
   currentIndex = 0;
   showWord();
-  alert("List loaded successfully!");
-  toggleSettings(); // Automatically hide settings panel once loaded
 }
 
 function showWord(){
@@ -483,9 +494,27 @@ function checkAnswer(){
   }
 }
 
-// Initial default load on startup
+// Initial load on startup with localStorage recovery
 window.onload = function() {
-  loadWordList();
+  try {
+    let savedWords = localStorage.getItem("abakada_words");
+    let savedMeanings = localStorage.getItem("abakada_meanings");
+    if (savedWords) {
+      document.getElementById("wordInputBox").value = savedWords;
+    }
+    if (savedMeanings) {
+      document.getElementById("meaningInputBox").value = savedMeanings;
+    }
+    processTextData(
+      document.getElementById("wordInputBox").value,
+      document.getElementById("meaningInputBox").value
+    );
+  } catch (e) {
+    processTextData(
+      document.getElementById("wordInputBox").value,
+      document.getElementById("meaningInputBox").value
+    );
+  }
   document.getElementById("wordBankCard").style.display = "none"; // start collapsed
 };
 </script>
